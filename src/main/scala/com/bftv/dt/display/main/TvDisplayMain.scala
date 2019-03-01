@@ -14,11 +14,11 @@ object TvDisplayMain {
 
   def main(args: Array[String]): Unit = {
     //重传入参数获取key以及是否启用根据offset来获取kafka数据
-    //val sstreamingKey = args(0)
+    //val ssKey = args(0)
     //val flag = Integer.valueOf(args(1))
-    val sstreamingKey = "TvDisplay"
+    val ssKey = "TvDisplay"
     val flag = 0
-    val sstreamingKeyConf =
+    val ssKeyConf =
 
 
   }
