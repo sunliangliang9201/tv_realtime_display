@@ -1,4 +1,4 @@
-package com.bftv.dt.display.storage
+package com.bftv.dt.display.storage.mysql
 
 import com.bftv.dt.display.model.SSKeyConf
 import org.slf4j.LoggerFactory

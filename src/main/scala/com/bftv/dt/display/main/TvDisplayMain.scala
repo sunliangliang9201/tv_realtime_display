@@ -1,5 +1,6 @@
 package com.bftv.dt.display.main
 
+import com.bftv.dt.display.storage.mysql.MysqlDao
 import org.slf4j.LoggerFactory
 
 /**
@@ -18,7 +19,7 @@ object TvDisplayMain {
     //val flag = Integer.valueOf(args(1))
     val ssKey = "TvDisplay"
     val flag = 0
-    val ssKeyConf =
+    val ssKeyConf = MysqlDao.getSSConf(ssKey)
 
 
   }
