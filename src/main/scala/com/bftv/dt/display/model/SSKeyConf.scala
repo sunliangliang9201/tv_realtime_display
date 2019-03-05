@@ -7,7 +7,6 @@ package com.bftv.dt.display.model
   * @version 1.0
   */
 
-
 case class SSKeyConf (ssKey:String, appName:String, driverCores:String,
                       formator:String, topics:String, groupID:String, tableName:String,
-                      fields:String, brolerList:String)
+                      fields:Array[String], brolerList:String)
