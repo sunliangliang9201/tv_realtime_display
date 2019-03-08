@@ -18,8 +18,6 @@ class SDKFormator extends LogFormator {
 
   val logRegex = """(\d+\.\d+\.\d+\.\d+).*?logger.php\?(.*?) HTTP.*""".r
 
-  //query: enc=0&appkey=bftv&ltype=heart&log={%22uid%22:%22androidId1c7f471e675d6d61%22,%22imei%22:%22androidId1c7f471e675d6d61%22,%22userid%22:%22-%22,%22mac%22:%225c:ff:ff:82:c0:31%22,%22apptoken%22:%22282340ce12c5e10fa84171660a2054f8%22,%22ver%22:%223.1.0.397%22,%22mtype%22:%22BAOFENG_TV%20AML_T866%22,%22version%22:%223.0%22,%22androidid%22:%221c7f471e675d6d61%22,%22unet%22:%221%22,%22mos%22:%224.4.2%22,%22itime%22:%222019-03-05%2014:58:37%22,%22value%22:{%22sn%22:%22600000MWE00D169V2941_8AE6%22,%22plt_ver%22:%22V4.1.02%22,%22package_name%22:%22com.bftv.fui.launcher%22,%22pid%22:%22heart%22,%22lau_ver%22:%224.0.4.1664%22,%22plt%22:%22AML_T866H%22,%22softid%22:%2211161801%22,%22page_title%22:%22com.bftv.fui.launcher.views.activity.IndexRootActivity%22,%22ip%22:%2239.189.43.57%22},%22gid%22:%22dev%22,%22uuid%22:%22600000MWE00D169V2941_8AE6%22}
-  // ip: 39.189.43.57
   /**
     * 解析整个message并返回一个json字符串
     * @param logStr 原始message

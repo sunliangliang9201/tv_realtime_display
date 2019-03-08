@@ -37,7 +37,6 @@ object TvDisplayMain {
     //val spark = SparkSession.builder().appName(ssKeyConf.appName).config("spark.driver.cores", ssKeyConf.driverCores).config("spark.serializer", "org.apache.spark.serializer.KryoSerializer").getOrCreate()
     val spark  = SparkSession.builder().master("local[*]").appName(ssKeyConf.appName).config("spark.serializer", "org.apache.spark.serializer.KryoSerializer").getOrCreate()
     val sc = spark.sparkContext
-    //两个广播变量，其中bcConf后续加入更新策略unpersist()
     val bcConf = sc.broadcast(ssKeyConf)
     val bcIP = sc.broadcast(sc.textFile("e:/ip_area_isp.txt").filter(line => {
       null != line.stripMargin && "" != line.stripMargin
