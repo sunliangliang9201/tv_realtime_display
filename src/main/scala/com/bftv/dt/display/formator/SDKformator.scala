@@ -87,7 +87,13 @@ class SDKFormator extends LogFormator {
     try{
       res = allJson.get(field).toString
     }catch {
-      case e: NullPointerException => res = JSON.parseObject(allJson.get("value").toString).get(field).toString
+      case e: NullPointerException => {
+        try{
+          res = JSON.parseObject(allJson.get("value").toString).get(field).toString
+        }catch {
+          case e: Exception => //logger.error("Parse the massage from the json(log) & json(value) failed for field name of " + field + "," + e)
+        }
+      }
     }
     return res
   }
