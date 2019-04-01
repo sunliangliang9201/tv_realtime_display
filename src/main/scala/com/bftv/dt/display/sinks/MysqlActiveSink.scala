@@ -1,4 +1,4 @@
-package com.bftv.dt.display.Sinks
+package com.bftv.dt.display.sinks
 
 import java.sql.{Connection, PreparedStatement}
 
@@ -11,7 +11,7 @@ import org.apache.spark.sql.{ForeachWriter, Row}
   * @author sunliangliang 2019-03-01 https://github.com/sunliangliang9201/tv_realtime_display
   * @version 1.0
   */
-class MysqlSink extends ForeachWriter[Row]{
+class MysqlActiveSink extends ForeachWriter[Row]{
 
   var conn: Connection = null
 
@@ -23,7 +23,7 @@ class MysqlSink extends ForeachWriter[Row]{
   }
 
   override def process(value: Row): Unit = {
-    ps = conn.prepareStatement("replace into tv_active(window, appkey, count) values(?, ?, ?)")
+    ps = conn.prepareStatement("replace into bftv_realtime.tv_display_window_active(window, counts) values(?, ?)")
     ps.setString(1, value(0).toString)
     ps.setString(2, value(1).toString)
     ps.setInt(3, Integer.parseInt(value(2).toString))

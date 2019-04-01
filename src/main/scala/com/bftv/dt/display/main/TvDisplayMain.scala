@@ -1,8 +1,7 @@
 package com.bftv.dt.display.main
 
 import java.sql.Timestamp
-
-import com.bftv.dt.display.Sinks.{MysqlSink, MysqlSink2}
+import com.bftv.dt.display.sinks.{MysqlActiveSink, MysqlPositionSink}
 import com.bftv.dt.display.formator.LogFormator
 import com.bftv.dt.display.storage.mysql.MysqlDao
 import com.bftv.dt.display.utils.Constant
@@ -22,18 +21,13 @@ object TvDisplayMain {
   val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]): Unit = {
-    //从传入参数获取key以及是否启用根据offset来获取kafka数据
-    //val ssKey = args(0)
-    //val flag = Integer.valueOf(args(1))
-    val ssKey = "TvDisplay"
+    val ssKey = "TvDisplay3"
     val flag = 0
     val ssKeyConf = MysqlDao.getSSConf(ssKey)
     if (null == ssKey){
       logger.error("No ssstreaming config im mysql ...")
       System.exit(1)
     }
-    logger.info("Success load the sstreaming config from mysql !")
-
     //val spark = SparkSession.builder().appName(ssKeyConf.appName).config("spark.driver.cores", ssKeyConf.driverCores).config("spark.serializer", "org.apache.spark.serializer.KryoSerializer").getOrCreate()
     val spark  = SparkSession.builder().master("local[*]").appName(ssKeyConf.appName).config("spark.serializer", "org.apache.spark.serializer.KryoSerializer").getOrCreate()
     val sc = spark.sparkContext
@@ -44,6 +38,7 @@ object TvDisplayMain {
       (line.split("\t")(0), line.split("\t")(1), line.split("\t")(2), line.split("\t")(3), line.split("\t")(4).toLong, line.split("\t")(5).toLong)
     }).collect())
     val logFormator = Class.forName(Constant.FORMATOR_PACACKE_PREFIX + ssKeyConf.formator).newInstance().asInstanceOf[LogFormator]
+
     //引入隐式变换
     import spark.implicits._
     var sdf: DataFrame = null
@@ -60,6 +55,7 @@ object TvDisplayMain {
     }
     val sdf2 = sdf.selectExpr("CAST(value AS STRING)", "CAST(partition AS INT)", "CAST(offset AS INT)", "CAST(timestamp AS TIMESTAMP)")
       .as[(String, Int, Int, Timestamp)]
+
     //创建schema与df中字段匹配
     val fields = bcConf.value.fields.map(field => {
       var structField = StructField(field, StringType, true)
@@ -75,22 +71,23 @@ object TvDisplayMain {
     val finalSDF = sdf2.map(line => {
       val jsonStr = logFormator.format(line._1, bcIP.value, bcConf.value.fields)
       (jsonStr, line._2, line._3, line._4)
-    }).select(from_json($"_1", schema) as "values", $"_2" as "partition", $"_3" as "offset", $"_4" as "timestamp")
-      .select($"values.*", $"partition", $"offset", $"timestamp")
+    }).select(from_json($"_1", schema) as "values", $"_2" as "partition", $"_3" as "offset", $"_4" as "eventtime")
+      .select($"values.*", $"partition", $"offset", $"eventtime")
     //finalSDF.createOrReplaceTempView("heart")
     //val resPOS = spark.sql("select approx_count_distinct(uuid) from heart")
 
     //以下就是逻辑了
     //No.1 计算活跃用户，5分钟的窗口，1分钟的slide，只要有变化就修改mysql中的数据，mysql表设计有待优化
-    val resUV = finalSDF.withWatermark("timestamp", "3 minutes").groupBy(window($"timestamp", "5 minutes", "1 minutes"), $"appkey").count()
-    val queryUV = resUV.writeStream.outputMode("update").foreach(new MysqlSink).start()
-    //val queryUV = resUV.writeStream.outputMode("update").foreach(new MysqlSink).option("checkpointLocation", "e:/checkpoint/queryUV/").start()
-
-    //No.2 全国省市分布图，省份实时用户可以全部计算，但是城市太多，只能取topN
-    val resPOS = finalSDF.withWatermark("timestamp", "3 minutes").groupBy(window($"timestamp", "5 minutes", "2 minutes"), $"appkey", $"province", $"city").count()
-    val queryPOS = resPOS.writeStream.outputMode("update").foreach(new MysqlSink2).start()
-
+    val resUV = finalSDF.withWatermark("eventtime", "1 minutes").groupBy(window($"eventtime", "1 minutes", "1 minutes"), $"appkey").count()
+    val queryUV = resUV.writeStream.format("console").start()
     queryUV.awaitTermination()
-    queryPOS.awaitTermination()
+    //val queryUV = resUV.writeStream.outputMode("update").foreach(new MysqlActiveSink).start()
+
+    //No.2 全国省市分布图，省份实时用户可以全部计算
+    //val resPOS = finalSDF.withWatermark("timestamp", "1 minutes").groupBy(window($"timestamp", "5 minutes", "2 minutes"), $"appkey", $"province", $"city").count()
+    //val queryPOS = resPOS.writeStream.outputMode("update").foreach(new MysqlPositionSink).start()
+
+
+    //queryPOS.awaitTermination()
   }
 }

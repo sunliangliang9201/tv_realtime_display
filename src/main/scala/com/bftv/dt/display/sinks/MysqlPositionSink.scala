@@ -1,4 +1,4 @@
-package com.bftv.dt.display.Sinks
+package com.bftv.dt.display.sinks
 
 import java.sql.{Connection, PreparedStatement}
 
@@ -11,7 +11,7 @@ import org.apache.spark.sql.{ForeachWriter, Row}
   * @author sunliangliang 2019-03-01 https://github.com/sunliangliang9201/tv_realtime_display
   * @version 1.0
   */
-class MysqlSink2 extends ForeachWriter[Row]{
+class MysqlPositionSink extends ForeachWriter[Row]{
 
   var conn: Connection = null
 
